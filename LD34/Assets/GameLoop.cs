@@ -115,7 +115,7 @@ public class GameLoop : MonoBehaviour {
             }
         }
 
-        if(turtlesCaptured == turtleFriends.Count){
+        if(turtlesCaptured == turtleFriends.Count &&  turtlesCaptured != 0){
             AllCapturedLoss();
             return;
         }

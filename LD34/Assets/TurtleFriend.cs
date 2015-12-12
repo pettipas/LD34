@@ -12,4 +12,17 @@ public class TurtleFriend : MonoBehaviour {
         get;
         set;
     }
+
+    void OnDrawGizmos(){
+        
+        if(Captured){
+            Gizmos.color = Color.blue;
+            Gizmos.DrawCube(transform.position,Vector3.one);
+        }
+
+        if(Saved){
+            Gizmos.color = Color.red;
+            Gizmos.DrawCube(transform.position,Vector3.one);
+        }
+    }
 }
