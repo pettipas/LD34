@@ -13,10 +13,11 @@ public abstract class MovementScheme : MonoBehaviour {
         }
     }
 
+    Vector3 nextDest;
     public IEnumerator StepAndTurn(Vector3 validNextPosition){
         float timeFrag = 1/moveSpeed;
         float t = 0;
-
+        nextDest = validNextPosition;
         Vector3 startPosition = transform.position;
         Vector3 lookDir = (validNextPosition - transform.position).normalized;
         body.transform.forward = lookDir;
@@ -50,5 +51,11 @@ public abstract class MovementScheme : MonoBehaviour {
         yield return new WaitForSeconds(0.2f);
         actionRunning = false;
         yield break;
+    }
+
+    public void OnDrawGizmos(){
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(transform.position,nextDest);
+        Gizmos.DrawSphere(nextDest,0.5f);
     }
 }

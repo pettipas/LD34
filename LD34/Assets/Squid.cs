@@ -3,9 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Squid : MovementScheme {
-
+    
+    float detectionDistance = 1.0f;
     public float movementRate = 3.0f;
     public float movementTimer;
+
+    public void Awake(){
+    }
 
     public void Update(){
         movementTimer-=Time.deltaTime;
@@ -13,7 +17,7 @@ public class Squid : MovementScheme {
         if(movementTimer<0 && !actionRunning){
             movementTimer = movementRate;
             actionRunning = true;
-            StartCoroutine(StepAndTurn(Vector3.zero));
+            StartCoroutine(StepAndTurn(GetNextPosition()));
         }
 
 
@@ -34,40 +38,40 @@ public class Squid : MovementScheme {
         }
     }
 
+    bool DetectedNeighbor(RaycastHit[] rightHits){
+        int count = 0;
+        for(int i = 0; i < rightHits.Length;i++){
+            Squid squid =  rightHits[i].transform.GetComponent<Squid>();
+            if(squid != null && squid != this){
+                count++;
+            }
+        }
+        return count != 0;
+    }
+
     public Vector3 GetNextPosition(){
 
         List<Vector3> nextPositions = new List<Vector3>();
+        List<RaycastHit> allHits = new List<RaycastHit>();
+        RaycastHit[] rightHits = Physics.RaycastAll(transform.position,transform.right, detectionDistance);
+        RaycastHit[] leftHits = Physics.RaycastAll(transform.position,-transform.right, detectionDistance);
+        RaycastHit[] forwardHits = Physics.RaycastAll(transform.position,transform.forward,detectionDistance);
+        RaycastHit[] behindHits = Physics.RaycastAll(transform.position,-transform.forward,detectionDistance);
 
-        RaycastHit hitRight;
-        if(Physics.Raycast(transform.position,transform.right, out hitRight, 1.0f)){
-            Squid s = hitRight.transform.GetComponent<Squid>();
-            if(s == null){
-                nextPositions.Add(transform.position + transform.right *1.0f);
-            }
+        if(!DetectedNeighbor(rightHits)){
+            nextPositions.Add(transform.position + transform.right *1.0f);
         }
 
-        RaycastHit hitLeft;
-        if(Physics.Raycast(transform.position,-transform.right,out hitLeft, 1.0f)){
-            Squid s = hitLeft.transform.GetComponent<Squid>();
-            if(s == null){
-                nextPositions.Add(transform.position + -transform.right *1.0f);
-            }
+        if(!DetectedNeighbor(leftHits)){
+            nextPositions.Add(transform.position + -transform.right *1.0f);
         }
 
-        RaycastHit hitBack;
-        if(Physics.Raycast(transform.position,transform.forward, out hitBack, 1.0f)){
-            Squid s = hitBack.transform.GetComponent<Squid>();
-            if(s == null){
-                nextPositions.Add(transform.position + transform.forward *1.0f);
-            }
+        if(!DetectedNeighbor(forwardHits)){
+            nextPositions.Add(transform.position + transform.forward *1.0f);
         }
 
-        RaycastHit hitForward;
-        if(Physics.Raycast(transform.position,-transform.forward, out hitForward, 1.0f)){
-            Squid s = hitForward.transform.GetComponent<Squid>();
-            if(s == null){
-                nextPositions.Add(transform.position + -transform.forward *1.0f);
-            }
+        if(!DetectedNeighbor(behindHits)){
+            nextPositions.Add(transform.position + -transform.forward *1.0f);
         }
 
         Vector3 p = GameLoop.Instance.ChooseAIPosition(nextPositions, transform.position);

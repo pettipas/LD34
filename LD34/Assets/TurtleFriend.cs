@@ -3,6 +3,12 @@ using System.Collections;
 
 public class TurtleFriend : MonoBehaviour {
 
+    public bool Out{
+        get{
+            return Captured || Saved;
+        }
+    }
+
     public bool Captured{
         get;
         set;

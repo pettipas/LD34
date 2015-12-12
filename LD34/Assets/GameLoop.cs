@@ -6,7 +6,7 @@ using System.Linq;
 public class GameLoop : MonoBehaviour {
 
     public Transform startPosition;
-    public FunBunny bunny;
+    public FunBunny bunnyInstance;
     public float worldWidth = 10.0f;
     public float worldHeight = 10.0f;
     public FunBunny funBunnyPrefab;
@@ -14,7 +14,6 @@ public class GameLoop : MonoBehaviour {
     public Squid squidPrefab;
     public int level;
     public int turtlesSaved;
-    public int turtlesCaptured;
     public static GameLoop Instance;
   
     public List<Squid> squids = new List<Squid>();
@@ -28,9 +27,9 @@ public class GameLoop : MonoBehaviour {
     }
 
     void Start () {
-        bunny = funBunnyPrefab.Duplicate(startPosition.position);
-        bunny.LoseCondition = false;
-        bunny.GetComponent<Ctrl>().Blocked = false;
+        bunnyInstance = funBunnyPrefab.Duplicate(startPosition.position);
+        bunnyInstance.LoseCondition = false;
+        bunnyInstance.GetComponent<Ctrl>().Blocked = false;
         StartCoroutine(Game());
 	}
 
@@ -56,11 +55,11 @@ public class GameLoop : MonoBehaviour {
         Vector3 choice;
 
         closestToBunny = possiblePositions[0];
-        float distanceToBunny = Vector3.Distance(closestToBunny, bunny.transform.position);
+        float distanceToBunny = Vector3.Distance(closestToBunny, bunnyInstance.transform.position);
 
         for(int i = 0; i < possiblePositions.Count; i++){
             Vector3 v = possiblePositions[i];
-            float testDistance = Vector3.Distance(v,bunny.transform.position);
+            float testDistance = Vector3.Distance(v,bunnyInstance.transform.position);
             if(testDistance < distanceToBunny){
                 distanceToBunny = testDistance;
                 closestToBunny = v;
@@ -72,9 +71,9 @@ public class GameLoop : MonoBehaviour {
         for(int i = 0; i < possiblePositions.Count; i++){
             Vector3 v = possiblePositions[i];
             float testDistance = Vector3.Distance(v,closestTurtle.transform.position);
-            if(testDistance < distanceToBunny){
-                distanceToBunny = testDistance;
-                closestToBunny = v;
+            if(testDistance < distanceToTurtle){
+                distanceToTurtle = testDistance;
+                closestToTurtle = v;
             }
         }
 
@@ -87,12 +86,12 @@ public class GameLoop : MonoBehaviour {
 
     void OnSavedTurtle(TurtleFriend saved){
         saved.Saved = true;
+        turtlesSaved++;
         Debug.Log("Saved Turtle");
     }
 
     public void OnCapturedTurtle(TurtleFriend captured){
         captured.Captured = true;
-        turtlesCaptured++;
         Debug.Log("Captured Turtle");
     }
 
@@ -103,7 +102,7 @@ public class GameLoop : MonoBehaviour {
 
     void AllCapturedLoss(){
         Debug.Log("Bunny Also Loses");
-        bunny.LoseCondition = true;
+        bunnyInstance.LoseCondition = true;
     }
 
     public void Update(){
@@ -120,14 +119,14 @@ public class GameLoop : MonoBehaviour {
             return;
         }
        
-        Collider[] detected = Physics.OverlapBox(bunny.transform.position, new Vector3(0.4f,0.4f,0.4f));
+        Collider[] detected = Physics.OverlapBox(bunnyInstance.transform.position, new Vector3(0.4f,0.4f,0.4f));
         for(int i = 0; i < detected.Length;i++){
 
             TurtleFriend tf = detected[i].transform.GetComponent<TurtleFriend>();
             Squid squid = detected[i].transform.GetComponent<Squid>();
 
-            if(squid != null && !bunny.LoseCondition){
-                OnBunnyLoses(bunny);
+            if(squid != null && !bunnyInstance.LoseCondition){
+                OnBunnyLoses(bunnyInstance);
                 return;
             }
 
@@ -137,12 +136,18 @@ public class GameLoop : MonoBehaviour {
         }
     }
 	
+    bool AllTurtlesOut{
+        get{
+            return turtleFriends.FindAll(x=>x.Out == true).Count ==turtleFriends.Count;
+        }
+    }
+
     IEnumerator Game(){
         yield return StartCoroutine(ShowTitle());
         yield return StartCoroutine(SpawnTurtles());
 
-        while(!bunny.LoseCondition){
-            if(turtleFriends.Count <= turtlesSaved){
+        while(!bunnyInstance.LoseCondition){
+            if(AllTurtlesOut){
                 level++;
                 yield return StartCoroutine(GotoNextLevel());
             }
@@ -176,12 +181,14 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator ClearLevel(){
+        turtlesSaved = 0;
+
         while(turtleFriends.Count > 0){
             TurtleFriend tf = turtleFriends.Chomp();
             Destroy(tf.gameObject);
         }
 
-        while(turtleFriends.Count > 0){
+        while(squids.Count > 0){
             Squid s = squids.Chomp();
             Destroy(s.gameObject);
         }
@@ -241,7 +248,7 @@ public class GameLoop : MonoBehaviour {
             }
 
             //check bunny
-            Vector3 bp = bunny.transform.position;
+            Vector3 bp = bunnyInstance.transform.position;
             if(SamePosition(bp,placementPos)){
                 goodPosition = false;
             }
