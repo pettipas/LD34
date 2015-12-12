@@ -87,21 +87,17 @@ public class GameLoop : MonoBehaviour {
     void OnSavedTurtle(TurtleFriend saved){
         saved.Saved = true;
         turtlesSaved++;
-        Debug.Log("Saved Turtle");
     }
 
     public void OnCapturedTurtle(TurtleFriend captured){
         captured.Captured = true;
-        Debug.Log("Captured Turtle");
     }
 
     void OnBunnyLoses(FunBunny bunny){
         bunny.LoseCondition = true;
-        Debug.Log("Bunny Loses");
     }
 
     void AllCapturedLoss(){
-        Debug.Log("Bunny Also Loses");
         bunnyInstance.LoseCondition = true;
     }
 
@@ -161,10 +157,8 @@ public class GameLoop : MonoBehaviour {
 
     IEnumerator ShowTitle(){
         while(Input.anyKey == false){
-            Debug.Log("waiting");
             yield return null;
         }
-        Debug.Log("game starts");
     }
 
     IEnumerator ShowEnd(){
@@ -225,7 +219,6 @@ public class GameLoop : MonoBehaviour {
 
         Vector3 placementPos = Vector3.zero;
         bool found = false;
-        Debug.Log("position search begins");
         while(!found){
             
             placementPos = new Vector3(Random.Range(0,9), 0, Random.Range(0,9));
@@ -257,7 +250,6 @@ public class GameLoop : MonoBehaviour {
                 found = true;
             }
         }
-        Debug.Log("position search ends");
         return placementPos;
     }
 

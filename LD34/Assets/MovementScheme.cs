@@ -3,6 +3,7 @@ using System.Collections;
 
 public abstract class MovementScheme : MonoBehaviour {
 
+    public Animator animator;
     public Transform body;
     public bool actionRunning;
     public float moveSpeed = 0.5f;
@@ -32,6 +33,12 @@ public abstract class MovementScheme : MonoBehaviour {
     }
 
     public IEnumerator Step(){
+
+        if(animator == null){
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        animator.Play("stride",0,0);
         float timeFrag = 1/0.5f;
         float t = 0;
         Vector3 destination = transform.position +  body.transform.forward * 1.0f;
@@ -41,6 +48,7 @@ public abstract class MovementScheme : MonoBehaviour {
             t+=timeFrag*Time.smoothDeltaTime;
             yield return null;
         }
+        animator.Play("breath",0,0);
         transform.position = destination;
         actionRunning = false;
         yield break;
