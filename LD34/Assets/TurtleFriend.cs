@@ -3,13 +3,13 @@ using System.Collections;
 
 public class TurtleFriend : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    public bool Captured{
+        get;
+        set;
+    }
+
+    public bool Saved{
+        get;
+        set;
+    }
 }

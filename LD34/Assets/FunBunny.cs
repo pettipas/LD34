@@ -3,11 +3,8 @@ using System.Collections;
 
 public class FunBunny : MonoBehaviour {
 
-
-
-    public bool Captured{
+    public bool LoseCondition{
         get;
         set;
     }
-	
 }
