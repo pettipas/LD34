@@ -272,7 +272,7 @@ public class GameLoop : MonoBehaviour {
         bool found = false;
         while(!found){
             
-            placementPos = new Vector3(Random.Range(0,9), 0, Random.Range(0,9));
+            placementPos = new Vector3(Random.Range(0,8), 0, Random.Range(0,8));
             bool goodPosition = true;
 
             //check turtles
