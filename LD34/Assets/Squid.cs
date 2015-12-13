@@ -8,6 +8,8 @@ public class Squid : MovementScheme {
     public float movementRate = 3.0f;
     public float movementTimer;
 
+    public bool chaseHero;
+
     public void Awake(){
     }
 
@@ -23,7 +25,7 @@ public class Squid : MovementScheme {
 
         if(!ActionRunning){// then we can check to see if we are near a turtle
 
-            Collider[] detected = Physics.OverlapBox(transform.position, new Vector3(0.4f,0.4f,0.4f));
+            Collider[] detected = Physics.OverlapBox(transform.position, new Vector3(0.6f,0.6f,0.6f));
             for(int i = 0; i < detected.Length;i++){
                 TurtleFriend tf = detected[i].transform.GetComponent<TurtleFriend>();
 
@@ -74,7 +76,7 @@ public class Squid : MovementScheme {
             nextPositions.Add(transform.position + -transform.forward *1.0f);
         }
 
-        Vector3 p = GameLoop.Instance.ChooseAIPosition(nextPositions, transform.position);
+        Vector3 p = GameLoop.Instance.ChooseAIPosition(nextPositions, transform.position, chaseHero);
         return p;
     }
 }

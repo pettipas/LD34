@@ -7,4 +7,9 @@ public class FunBunny : MonoBehaviour {
         get;
         set;
     }
+
+    [ContextMenu("TestLose")]
+    public void TestLose(){
+        LoseCondition = true;
+    }
 }

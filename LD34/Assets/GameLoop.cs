@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class GameLoop : MonoBehaviour {
 
+    public Transform bunnyTitle;
     public Transform startPosition;
     public FunBunny bunnyInstance;
     public float worldWidth = 10.0f;
@@ -15,7 +17,10 @@ public class GameLoop : MonoBehaviour {
     public int level;
     public int turtlesSaved;
     public static GameLoop Instance;
-  
+    public ParticleSystem poof;
+    public List<Squid> squidPrefabs = new List<Squid>();
+    public List<Transform> spawnPoints = new List<Transform>();
+
     public List<Squid> squids = new List<Squid>();
     public List<TurtleFriend> turtleFriends = new List<TurtleFriend>();
 
@@ -27,13 +32,14 @@ public class GameLoop : MonoBehaviour {
     }
 
     void Start () {
+        Time.timeScale = 1.0f;
         bunnyInstance = funBunnyPrefab.Duplicate(startPosition.position);
         bunnyInstance.LoseCondition = false;
         bunnyInstance.GetComponent<Ctrl>().Blocked = false;
         StartCoroutine(Game());
 	}
 
-    public Vector3 ChooseAIPosition(List<Vector3> possiblePositions, Vector3 defaultPos){
+    public Vector3 ChooseAIPosition(List<Vector3> possiblePositions, Vector3 defaultPos, bool chooseHero){
         if(possiblePositions.Count == 0){
             return defaultPos;
         }
@@ -77,7 +83,7 @@ public class GameLoop : MonoBehaviour {
             }
         }
 
-        if(Random.value < 0.5f){
+        if(chooseHero){
             return closestToBunny;
         }
 
@@ -136,7 +142,7 @@ public class GameLoop : MonoBehaviour {
 	
     bool AllTurtlesOut{
         get{
-//            Debug.Log(turtleFriends.FindAll(x=>x.Out == true).Count + " " + turtleFriends.Count);
+            Debug.Log(turtleFriends.FindAll(x=>x.Out == true).Count + " " + turtleFriends.Count);
             return turtleFriends.FindAll(x=>x.Out == true).Count == turtleFriends.Count;
         }
     }
@@ -145,10 +151,11 @@ public class GameLoop : MonoBehaviour {
         yield return StartCoroutine(ShowTitle());
         yield return StartCoroutine(SpawnTurtles());
 
+      
         while(!bunnyInstance.LoseCondition){
-
-            if(AllTurtlesOut){
+            if(AllTurtlesOut){  
                 level++;
+                Time.timeScale += 0.1f;
                 yield return StartCoroutine(GotoNextLevel());
             }
 
@@ -160,17 +167,22 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator ShowTitle(){
+        bunnyTitle.GetComponent<Animator>().Play("title_idle",0,0);
         while(Input.anyKey == false){
             yield return null;
         }
+
+        bunnyTitle.GetComponent<Animator>().Play("pop_away",0,0);
+        yield return new WaitForSeconds(2.0f);
     }
 
     IEnumerator ShowEnd(){
+        SceneManager.LoadScene("main");
         yield break;
     }
 
     IEnumerator GotoNextLevel(){
-        
+        yield return new WaitForSeconds(2.0f);
         yield return StartCoroutine(ClearLevel());
         yield return StartCoroutine(ShowSquidMaster());
         yield return StartCoroutine(SpawnTurtles());
@@ -188,14 +200,17 @@ public class GameLoop : MonoBehaviour {
 
         while(squids.Count > 0){
             Squid s = squids.Chomp();
+            poof.transform.position = s.transform.position;
+            poof.Emit(20);
             Destroy(s.gameObject);
         }
+
         yield break;
     }
 
     IEnumerator SpawnTurtles(){
         for(int i =0; i < 3; i++){
-            TurtleFriend tf =turtlePrefab.Duplicate(ValidPlacement());
+            TurtleFriend tf =turtlePrefab.Duplicate(ValidPlacement(4));
             turtleFriends.Add(tf);
         }
         yield break;
@@ -205,22 +220,44 @@ public class GameLoop : MonoBehaviour {
         if(level < 1){
             yield break;
         }
-        for(int i =0; i < 1; i++){
-            Squid s = squidPrefab.Duplicate(ValidPlacement());
+        if(level >= 4 ){
+            for(int i =0; i < 4; i++){
+                poof.transform.position = spawnPoints[i].position;
+                poof.Emit(30);
+                Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
+                squids.Add(s);
+            }
+        }else if(level == 3 ){
+            for(int i =0; i < 3; i++){
+                poof.transform.position = spawnPoints[i].position;
+                poof.Emit(30);
+                Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
+                squids.Add(s);
+            }
+        }else if(level == 2 ){
+            for(int i =0; i < 2; i++){
+                poof.transform.position = spawnPoints[i].position;
+                poof.Emit(30);
+                Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
+                squids.Add(s);
+            }
+        }else if(level == 1){
+            poof.transform.position = spawnPoints[0].position;
+            poof.Emit(30);
+            Squid s = squidPrefabs[0].Duplicate(spawnPoints[0].position);
             squids.Add(s);
         }
         yield break;
     }
 
     IEnumerator ShowSquidMaster(){
-        if(level >= 1 ){
+        if(level == 1 ){
             GetComponent<Animator>().Play("squidmaster_arrives",0,0);
-            Debug.Log("squid master comes in");
         }
         yield break;
     }
 
-    Vector3 ValidPlacement(){
+    Vector3 ValidPlacement(float distance){
 
         Vector3 placementPos = Vector3.zero;
         bool found = false;
@@ -232,7 +269,7 @@ public class GameLoop : MonoBehaviour {
             //check turtles
             for(int i = 0; i < turtleFriends.Count;i++){
                 Vector3 tpn = turtleFriends[i].transform.position;
-                if(SamePosition(tpn,placementPos) && FarEnoughAway(tpn,placementPos)){
+                if(SamePosition(tpn,placementPos) && !FarEnoughAway(tpn,placementPos,distance)){
                     goodPosition = false;
                 }
             }
@@ -240,14 +277,14 @@ public class GameLoop : MonoBehaviour {
             //check squids
             for(int i = 0; i < squids.Count;i++){
                 Vector3 sqp = squids[i].transform.position;
-                if(SamePosition(sqp,placementPos) && FarEnoughAway(sqp,placementPos)){
+                if(SamePosition(sqp,placementPos) && !FarEnoughAway(sqp,placementPos,distance)){
                     goodPosition = false;
                 }
             }
 
             //check bunny
             Vector3 bp = bunnyInstance.transform.position;
-            if(SamePosition(bp,placementPos) && FarEnoughAway(bp,placementPos)){
+            if(SamePosition(bp,placementPos) && !FarEnoughAway(bp,placementPos,distance)){
                 goodPosition = false;
             }
 
@@ -258,8 +295,8 @@ public class GameLoop : MonoBehaviour {
         return placementPos;
     }
 
-    bool FarEnoughAway(Vector3 p, Vector3 op){
-        return Vector3.Distance(p,op) >= 3;
+    bool FarEnoughAway(Vector3 p, Vector3 op, float distance){
+        return Vector3.Distance(p,op) >= distance;
     }
 
     bool SamePosition(Vector3 p,Vector3 op){

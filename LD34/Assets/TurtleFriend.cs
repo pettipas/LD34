@@ -15,6 +15,16 @@ public class TurtleFriend : MonoBehaviour {
         }
     }
 
+    [ContextMenu("TestCapture")]
+    public void TestCapture(){
+        Captured = true;
+    }
+
+    [ContextMenu("TestSaved")]
+    public void TestSaved(){
+        Saved = true;
+    }
+
     public bool Captured{
         get;
         set;
@@ -44,6 +54,6 @@ public class TurtleFriend : MonoBehaviour {
     }
 
     public void CaptureTurtle(){
-        GetComponentInChildren<Animator>().Play("capture",0,0);
+        GetComponentInChildren<Animator>().Play("death_flip",0,0);
     }
 }
