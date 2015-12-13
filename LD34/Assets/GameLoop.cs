@@ -151,11 +151,11 @@ public class GameLoop : MonoBehaviour {
         yield return StartCoroutine(ShowTitle());
         yield return StartCoroutine(SpawnTurtles());
 
-      
+       
         while(!bunnyInstance.LoseCondition){
             if(AllTurtlesOut){  
                 level++;
-                Time.timeScale += 0.1f;
+                Time.timeScale += 0.2f;
                 yield return StartCoroutine(GotoNextLevel());
             }
 
@@ -177,6 +177,13 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator ShowEnd(){
+        GetComponent<Animator>().Play("squidmaster_end",0,0);
+        yield return new WaitForSeconds(3.0f);
+        while(Input.anyKey == false && !Input.anyKeyDown){
+            yield return null;
+        }
+        GetComponent<Animator>().Play("squidmaster_end_hover",0,0);
+        yield return new WaitForSeconds(1.0f);
         SceneManager.LoadScene("main");
         yield break;
     }
@@ -254,6 +261,8 @@ public class GameLoop : MonoBehaviour {
         if(level == 1 ){
             GetComponent<Animator>().Play("squidmaster_arrives",0,0);
         }
+        yield return new WaitForSeconds(1.0f);
+        transform.GetComponentInChildren<LookAtThing>().thing = bunnyInstance.transform;
         yield break;
     }
 
