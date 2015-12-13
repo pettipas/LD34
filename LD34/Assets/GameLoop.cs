@@ -318,5 +318,9 @@ public class GameLoop : MonoBehaviour {
     void OnDrawGizmos(){
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireCube(new Vector3(worldWidth/2.0f,0,worldHeight/2.0f),new Vector3(10,1,10));
+
+        spawnPoints.ForEach(x=>{
+            Gizmos.DrawWireCube(x.transform.position, Vector3.one);
+        });
     }
 }

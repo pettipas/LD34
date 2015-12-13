@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Ctrl : MovementScheme {
 
+    public Transform animation;
+
     public bool Blocked{
         get;
         set;
