@@ -39,7 +39,7 @@ public abstract class MovementScheme : MonoBehaviour {
         }
 
         animator.Play("stride",0,0);
-        float timeFrag = 1/0.5f;
+        float timeFrag = 1/moveSpeed;
         float t = 0;
         Vector3 destination = transform.position +  body.transform.forward * 1.0f;
         Vector3 startPosition = transform.position;
@@ -54,7 +54,13 @@ public abstract class MovementScheme : MonoBehaviour {
         yield break;
     }
 
-    public IEnumerator Turn(){
+    public IEnumerator Turn() {
+        
+        if(animator == null){
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        animator.Play("hop",0,0);
         body.transform.eulerAngles += new Vector3(0,90,0);
         yield return new WaitForSeconds(0.2f);
         actionRunning = false;

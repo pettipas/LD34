@@ -3,9 +3,15 @@ using System.Collections;
 
 public class TurtleFriend : MonoBehaviour {
 
+    public Transform body;
+
+    public void Awake(){
+        body.eulerAngles+=new Vector3(0,-90*Random.Range(1,7),0);
+    }
+
     public bool Out{
         get{
-            return Captured || Saved;
+            return (Captured || Saved);
         }
     }
 
@@ -30,5 +36,14 @@ public class TurtleFriend : MonoBehaviour {
             Gizmos.color = Color.red;
             Gizmos.DrawCube(transform.position,Vector3.one);
         }
+    }
+
+    public void SaveTurtle(){
+        GetComponent<BoxCollider>().enabled = false;
+        GetComponentInChildren<Animator>().Play("flip",0,0);
+    }
+
+    public void CaptureTurtle(){
+        GetComponentInChildren<Animator>().Play("capture",0,0);
     }
 }

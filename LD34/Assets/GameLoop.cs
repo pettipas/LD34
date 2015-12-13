@@ -85,16 +85,18 @@ public class GameLoop : MonoBehaviour {
     }
 
     void OnSavedTurtle(TurtleFriend saved){
+        saved.SaveTurtle();
         saved.Saved = true;
         turtlesSaved++;
     }
 
     public void OnCapturedTurtle(TurtleFriend captured){
         captured.Captured = true;
+        captured.CaptureTurtle();
     }
 
     void OnBunnyLoses(FunBunny bunny){
-        bunny.LoseCondition = true;
+        bunnyInstance.LoseCondition = true;
     }
 
     void AllCapturedLoss(){
@@ -134,7 +136,8 @@ public class GameLoop : MonoBehaviour {
 	
     bool AllTurtlesOut{
         get{
-            return turtleFriends.FindAll(x=>x.Out == true).Count ==turtleFriends.Count;
+//            Debug.Log(turtleFriends.FindAll(x=>x.Out == true).Count + " " + turtleFriends.Count);
+            return turtleFriends.FindAll(x=>x.Out == true).Count == turtleFriends.Count;
         }
     }
 
@@ -143,6 +146,7 @@ public class GameLoop : MonoBehaviour {
         yield return StartCoroutine(SpawnTurtles());
 
         while(!bunnyInstance.LoseCondition){
+
             if(AllTurtlesOut){
                 level++;
                 yield return StartCoroutine(GotoNextLevel());
@@ -201,7 +205,7 @@ public class GameLoop : MonoBehaviour {
         if(level < 1){
             yield break;
         }
-        for(int i =0; i < 2; i++){
+        for(int i =0; i < 1; i++){
             Squid s = squidPrefab.Duplicate(ValidPlacement());
             squids.Add(s);
         }
@@ -209,7 +213,8 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator ShowSquidMaster(){
-        if(level >= 2 ){
+        if(level >= 1 ){
+            GetComponent<Animator>().Play("squidmaster_arrives",0,0);
             Debug.Log("squid master comes in");
         }
         yield break;
@@ -227,7 +232,7 @@ public class GameLoop : MonoBehaviour {
             //check turtles
             for(int i = 0; i < turtleFriends.Count;i++){
                 Vector3 tpn = turtleFriends[i].transform.position;
-                if(SamePosition(tpn,placementPos)){
+                if(SamePosition(tpn,placementPos) && FarEnoughAway(tpn,placementPos)){
                     goodPosition = false;
                 }
             }
@@ -235,14 +240,14 @@ public class GameLoop : MonoBehaviour {
             //check squids
             for(int i = 0; i < squids.Count;i++){
                 Vector3 sqp = squids[i].transform.position;
-                if(SamePosition(sqp,placementPos)){
+                if(SamePosition(sqp,placementPos) && FarEnoughAway(sqp,placementPos)){
                     goodPosition = false;
                 }
             }
 
             //check bunny
             Vector3 bp = bunnyInstance.transform.position;
-            if(SamePosition(bp,placementPos)){
+            if(SamePosition(bp,placementPos) && FarEnoughAway(bp,placementPos)){
                 goodPosition = false;
             }
 
@@ -251,6 +256,10 @@ public class GameLoop : MonoBehaviour {
             }
         }
         return placementPos;
+    }
+
+    bool FarEnoughAway(Vector3 p, Vector3 op){
+        return Vector3.Distance(p,op) >= 3;
     }
 
     bool SamePosition(Vector3 p,Vector3 op){
