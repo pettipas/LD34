@@ -3,6 +3,8 @@ using System.Collections;
 
 public class FunBunny : MonoBehaviour {
 
+    public AudioSource takesHit;
+
     public bool LoseCondition{
         get;
         set;
@@ -24,6 +26,7 @@ public class FunBunny : MonoBehaviour {
     public void ResetInvincible(bool flash){
         timer = duration;
         if(flash) {
+            takesHit.Play();
             GetComponent<MaterialFlasher>().FlashForTime(2.0f);
         }
     }

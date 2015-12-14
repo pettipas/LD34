@@ -4,12 +4,14 @@ using System.Collections;
 public class TurtleFriend : MonoBehaviour {
 
     public Transform body;
-
+    public AudioSource pop;
+    public AudioSource save;
     public void Awake(){
         body.eulerAngles+=new Vector3(0,-90*Random.Range(1,7),0);
     }
 
     IEnumerator Start(){
+        pop.Play();
         GetComponent<BoxCollider>().enabled = false;
         yield return new WaitForSeconds(3.0f);
         GetComponent<BoxCollider>().enabled = true;
@@ -90,6 +92,7 @@ public class TurtleFriend : MonoBehaviour {
     }
 
     public void SaveTurtle(){
+        save.Play();
         GetComponent<BoxCollider>().enabled = false;
         GetComponentInChildren<Animator>().Play("flip",0,0);
     }

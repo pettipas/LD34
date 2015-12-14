@@ -3,6 +3,8 @@ using System.Collections;
 
 public abstract class MovementScheme : MonoBehaviour {
 
+    public AudioSource hop;
+    public AudioSource step;
     public Animator animator;
     public Transform body;
     public bool actionRunning;
@@ -37,7 +39,7 @@ public abstract class MovementScheme : MonoBehaviour {
         if(animator == null){
             animator = GetComponentInChildren<Animator>();
         }
-
+        step.Play();
         animator.Play("stride",0,0);
         float timeFrag = 1/moveSpeed;
         float t = 0;
@@ -65,7 +67,7 @@ public abstract class MovementScheme : MonoBehaviour {
     }
 
     public IEnumerator Turn() {
-        
+        hop.Play();
         if(animator == null){
             animator = GetComponentInChildren<Animator>();
         }

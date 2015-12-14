@@ -34,7 +34,12 @@ public class GameLoop : MonoBehaviour {
 
     public int points;
 
+    public AudioSource kidnapped;
+    public AudioSource squidEnter;
+    public AudioSource end;
+
     void Awake(){
+        AudioListener.volume = 0.5f;
         pointsAnimator = pointsDisplay.GetComponent<Animator>();
         if(Instance != null){
             Instance = null;
@@ -111,6 +116,7 @@ public class GameLoop : MonoBehaviour {
 
 
     public void OnCapturedTurtle(TurtleFriend captured){
+        kidnapped.Play();
         captured.Captured = true;
         captured.CaptureTurtle();
         captured.FlyToPosition(flyto,vortex);
@@ -220,6 +226,7 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator ShowEnd(){
+        end.Play();
         GetComponent<Animator>().Play("squidmaster_end",0,0);
         yield return new WaitForSeconds(3.0f);
         while(Input.anyKey == false && !Input.anyKeyDown){
@@ -263,6 +270,7 @@ public class GameLoop : MonoBehaviour {
 
     IEnumerator SpawnTurtles(){
         for(int i =0; i < 3; i++){
+            yield return new WaitForSeconds(0.5f);
             TurtleFriend tf =turtlePrefab.Duplicate(ValidPlacement(4));
             turtleFriends.Add(tf);
         }
@@ -274,9 +282,12 @@ public class GameLoop : MonoBehaviour {
             yield break;
         }
         if(level >= 4 ){
+            
             for(int i =0; i < 4; i++){
                 poof.transform.position = spawnPoints[i].position;
                 poof.Emit(30);
+                squidEnter.Play();
+                yield return new WaitForSeconds(1.5f);
                 Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
                 squids.Add(s);
             }
@@ -284,6 +295,8 @@ public class GameLoop : MonoBehaviour {
             for(int i =0; i < 3; i++){
                 poof.transform.position = spawnPoints[i].position;
                 poof.Emit(30);
+                squidEnter.Play();
+                yield return new WaitForSeconds(1.5f);
                 Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
                 squids.Add(s);
             }
@@ -291,12 +304,16 @@ public class GameLoop : MonoBehaviour {
             for(int i =0; i < 2; i++){
                 poof.transform.position = spawnPoints[i].position;
                 poof.Emit(30);
+                squidEnter.Play();
+                yield return new WaitForSeconds(1.5f);
                 Squid s = squidPrefabs[i].Duplicate(spawnPoints[i].position);
                 squids.Add(s);
             }
         }else if(level == 1){
             poof.transform.position = spawnPoints[0].position;
             poof.Emit(30);
+            squidEnter.Play();
+            yield return new WaitForSeconds(1.5f);
             Squid s = squidPrefabs[0].Duplicate(spawnPoints[0].position);
             squids.Add(s);
         }
