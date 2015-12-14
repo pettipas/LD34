@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class GameLoop : MonoBehaviour {
 
+    public Life life;
+    public GameObject instructions;
+    public Transform flyto;
     public Transform bunnyTitle;
     public Transform startPosition;
     public FunBunny bunnyInstance;
@@ -18,11 +21,15 @@ public class GameLoop : MonoBehaviour {
     public int turtlesSaved;
     public static GameLoop Instance;
     public ParticleSystem poof;
+    public ParticleSystem vortex;
     public List<Squid> squidPrefabs = new List<Squid>();
     public List<Transform> spawnPoints = new List<Transform>();
 
+    public int failsOrREdemption;
     public List<Squid> squids = new List<Squid>();
     public List<TurtleFriend> turtleFriends = new List<TurtleFriend>();
+
+
 
     void Awake(){
         if(Instance != null){
@@ -96,20 +103,35 @@ public class GameLoop : MonoBehaviour {
         turtlesSaved++;
     }
 
+
     public void OnCapturedTurtle(TurtleFriend captured){
         captured.Captured = true;
         captured.CaptureTurtle();
+        captured.FlyToPosition(flyto,vortex);
+        failsOrREdemption++;
     }
 
     void OnBunnyLoses(FunBunny bunny){
-        bunnyInstance.LoseCondition = true;
+        if(!bunny.Invincible){
+            failsOrREdemption++;
+            bunnyInstance.ResetInvincible(true);
+        }
     }
 
     void AllCapturedLoss(){
         bunnyInstance.LoseCondition = true;
     }
 
+    public void EatTurtle(){
+        
+    }
+
     public void Update(){
+
+
+        if(life != null){
+            life.UpdateHearts(5-failsOrREdemption);
+        }
 
         int turtlesCaptured = 0;
         for(int i = 0; i < turtleFriends.Count;i++) {
@@ -118,7 +140,7 @@ public class GameLoop : MonoBehaviour {
             }
         }
 
-        if(turtlesCaptured == turtleFriends.Count &&  turtlesCaptured != 0){
+        if(failsOrREdemption == 5){
             AllCapturedLoss();
             return;
         }
@@ -142,8 +164,13 @@ public class GameLoop : MonoBehaviour {
 	
     bool AllTurtlesOut{
         get{
-            Debug.Log(turtleFriends.FindAll(x=>x.Out == true).Count + " " + turtleFriends.Count);
             return turtleFriends.FindAll(x=>x.Out == true).Count == turtleFriends.Count;
+        }
+    }
+
+    IEnumerator WaitForTurtles(){
+        while(turtleFriends.FindAll(x=>x.IsFlying).Count != 0){
+            yield return null;
         }
     }
 
@@ -154,9 +181,16 @@ public class GameLoop : MonoBehaviour {
        
         while(!bunnyInstance.LoseCondition){
             if(AllTurtlesOut){  
+                bunnyInstance.ResetInvincible(false);
                 level++;
                 Time.timeScale += 0.2f;
+
+                if(turtleFriends.FindAll(x=>x.Saved).Count == 3){
+                    failsOrREdemption++;
+                }
+
                 yield return StartCoroutine(GotoNextLevel());
+                bunnyInstance.GetComponent<Collider>().enabled = true;
             }
 
             yield return null;
@@ -189,7 +223,9 @@ public class GameLoop : MonoBehaviour {
     }
 
     IEnumerator GotoNextLevel(){
+        instructions.SetActive(false);
         yield return new WaitForSeconds(2.0f);
+        yield return StartCoroutine(WaitForTurtles());
         yield return StartCoroutine(ClearLevel());
         yield return StartCoroutine(ShowSquidMaster());
         yield return StartCoroutine(SpawnTurtles());
@@ -197,7 +233,8 @@ public class GameLoop : MonoBehaviour {
         yield break;
     }
 
-    IEnumerator ClearLevel(){
+    IEnumerator ClearLevel() {
+        
         turtlesSaved = 0;
 
         while(turtleFriends.Count > 0){

@@ -7,9 +7,37 @@ public class FunBunny : MonoBehaviour {
         get;
         set;
     }
+    BoxCollider collider;
+    public void Start(){
+        collider = GetComponent<BoxCollider>();
+    }
 
-    [ContextMenu("TestLose")]
-    public void TestLose(){
-        LoseCondition = true;
+    float duration =2.0f;
+    float timer;
+
+    public bool Invincible{
+        get{
+            return timer > 0;
+        }
+    }
+
+    public void ResetInvincible(bool flash){
+        timer = duration;
+        if(flash) {
+            GetComponent<MaterialFlasher>().FlashForTime(2.0f);
+        }
+    }
+
+    public void Update(){
+
+        if(timer > 0){
+            collider.enabled = false;
+        }else {
+            collider.enabled = true;
+        }
+
+        if(timer > -1){
+            timer-=Time.smoothDeltaTime;
+        }
     }
 }

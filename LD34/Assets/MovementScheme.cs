@@ -42,6 +42,16 @@ public abstract class MovementScheme : MonoBehaviour {
         float timeFrag = 1/moveSpeed;
         float t = 0;
         Vector3 destination = transform.position +  body.transform.forward * 1.0f;
+
+        if(destination.x < -1 ||
+            destination.z < -1 ||
+            destination.x>11||
+            destination.z>11){
+            Debug.Log("blocked");
+            actionRunning = false;
+            yield break;
+        }
+
         Vector3 startPosition = transform.position;
         while(t < 1){
             transform.position = Vector3.Lerp(startPosition, destination,t);

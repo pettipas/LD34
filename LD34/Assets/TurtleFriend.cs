@@ -9,10 +9,51 @@ public class TurtleFriend : MonoBehaviour {
         body.eulerAngles+=new Vector3(0,-90*Random.Range(1,7),0);
     }
 
+    IEnumerator Start(){
+        GetComponent<BoxCollider>().enabled = false;
+        yield return new WaitForSeconds(3.0f);
+        GetComponent<BoxCollider>().enabled = true;
+        yield break;
+    }
+
     public bool Out{
         get{
             return (Captured || Saved);
         }
+    }
+
+    public bool IsFlying{
+        get{
+            return running;
+        }
+    }
+
+    public void FlyToPosition(Transform flyTo, ParticleSystem vortex){
+        
+        GetComponentInChildren<Animator>().Play("fly",0,0);
+        if(!running){
+           
+            running = true;
+            StartCoroutine(FlyToPosition(flyTo.transform.position,vortex));
+        }
+    }
+    bool running = false;
+
+    IEnumerator FlyToPosition(Vector3 validNextPosition, ParticleSystem system){
+        yield return new WaitForSeconds(1.0f);
+        float timeFrag = 1/2f;
+        float t = 0;
+        Vector3 startPosition = transform.position;
+        Vector3 lookDir = (validNextPosition - transform.position).normalized;
+        body.transform.forward = lookDir;
+        while(t < 1){
+            system.Emit(30);
+            transform.position = Vector3.Lerp(startPosition, validNextPosition, t);
+            t+=timeFrag*Time.smoothDeltaTime;
+            yield return null;
+        }
+        gameObject.SetActive(false);
+        running = false;
     }
 
     [ContextMenu("TestCapture")]
