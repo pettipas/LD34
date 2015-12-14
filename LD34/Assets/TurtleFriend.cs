@@ -6,6 +6,7 @@ public class TurtleFriend : MonoBehaviour {
     public Transform body;
     public AudioSource pop;
     public AudioSource save;
+    public AudioSource eaten;
     public void Awake(){
         body.eulerAngles+=new Vector3(0,-90*Random.Range(1,7),0);
     }
@@ -54,7 +55,8 @@ public class TurtleFriend : MonoBehaviour {
             t+=timeFrag*Time.smoothDeltaTime;
             yield return null;
         }
-        gameObject.SetActive(false);
+        eaten.Play();
+        Destroy(body.gameObject);
         running = false;
     }
 
