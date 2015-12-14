@@ -3,9 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameLoop : MonoBehaviour {
 
+    public Text pointsDisplay;
+    Animator pointsAnimator;
     public Life life;
     public GameObject instructions;
     public Transform flyto;
@@ -29,9 +32,10 @@ public class GameLoop : MonoBehaviour {
     public List<Squid> squids = new List<Squid>();
     public List<TurtleFriend> turtleFriends = new List<TurtleFriend>();
 
-
+    public int points;
 
     void Awake(){
+        pointsAnimator = pointsDisplay.GetComponent<Animator>();
         if(Instance != null){
             Instance = null;
         }
@@ -101,6 +105,8 @@ public class GameLoop : MonoBehaviour {
         saved.SaveTurtle();
         saved.Saved = true;
         turtlesSaved++;
+        points+=100;
+        pointsAnimator.Play("goup",0,0);
     }
 
 
@@ -128,7 +134,7 @@ public class GameLoop : MonoBehaviour {
 
     public void Update(){
 
-
+        pointsDisplay.text = points.ToString("D6");
         if(life != null){
             life.UpdateHearts(5-failsOrREdemption);
         }
@@ -186,7 +192,10 @@ public class GameLoop : MonoBehaviour {
                 Time.timeScale += 0.2f;
 
                 if(turtleFriends.FindAll(x=>x.Saved).Count == 3){
-                    failsOrREdemption++;
+                    failsOrREdemption--;
+                    if(failsOrREdemption < 0){
+                        failsOrREdemption = 0;
+                    }
                 }
 
                 yield return StartCoroutine(GotoNextLevel());
